@@ -29,12 +29,14 @@ func messageSource(done <-chan struct{}) <-chan Message {
 		log.Println("messageSource started")
 		defer log.Println("messageSource stopped")
 		for i := 0; ; i++ {
-			select {
-			case messages <- Message{
+			message := Message{
 				ID:   i,
 				Text: texts[rand.Intn(len(texts))],
 				Tags: tags[rand.Intn(len(tags))],
-			}:
+			}
+
+			select {
+			case messages <- message:
 				<-time.After(1 * time.Second)
 
 			case <-done:
