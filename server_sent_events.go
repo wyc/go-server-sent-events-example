@@ -81,9 +81,9 @@ func MessageServer(w http.ResponseWriter, r *http.Request) {
 
 		// Marshal a Message into JSON
 		message := <-messages
-		bs, err := json.MarshalIndent(message, "", "  ")
+		bs, err := json.Marshal(message)
 		if err != nil {
-			log.Fatal("MarhsalIndent: ", err)
+			log.Fatal("Marhsal: ", err)
 		}
 
 		// Put into the SSE format:
