@@ -27,6 +27,6 @@ Concurrent connections from curl and Javascript EventSource have no delay.
 https://html.spec.whatwg.org/multipage/comms.html#concept-event-stream-last-event-id
 - Why the long project name?
 [To prevent confusion](http://en.wikipedia.org/wiki/Streaming_SIMD_Extensions)
-
+- Thanks to cronos from `irc.freenode.net/#go-nuts` for reviewing my code
 
 Feel free to send pull requests or leave comments.

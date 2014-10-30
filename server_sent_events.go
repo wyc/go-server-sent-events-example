@@ -53,18 +53,25 @@ func MessageServer(w http.ResponseWriter, r *http.Request) {
 	defer close(done)
 	messages := messageSource(done)
 
+	// Type assertions to check ResponseWriter for necessary features
+	closeNotifier, ok := w.(http.CloseNotifier)
+	if !ok {
+		log.Printf("Error: ResponseWriter does not support CloseNotify()")
+		return
+	}
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		log.Println("Error: ResponseWriter does not support Flush()")
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Cache-Control", "no-cache")
 	for {
 		// Check to see if the connection has closed
-		cn, ok := w.(http.CloseNotifier)
-		if !ok {
-			log.Printf("Error: ResponseWriter does not support CloseNotify()")
-			return
-		}
 		select {
-		case <-cn.CloseNotify():
+		case <-closeNotifier.CloseNotify():
 			log.Printf("%s disconnected", r.RemoteAddr)
 			return
 		default:
@@ -83,13 +90,12 @@ func MessageServer(w http.ResponseWriter, r *http.Request) {
 		bs = append(bs, []byte("\n\n")...)
 
 		// Write and flush
-		f, ok := w.(http.Flusher)
-		if !ok {
-			log.Println("Error: ResponseWriter does not support Flush()")
+		_, err = w.Write(bs)
+		if err != nil {
+			log.Printf("Write to %s failed", r.RemoteAddr)
 			return
 		}
-		w.Write(bs)
-		f.Flush()
+		flusher.Flush()
 		log.Printf("Sent message #%d to %s", message.ID, r.RemoteAddr)
 	}
 }
